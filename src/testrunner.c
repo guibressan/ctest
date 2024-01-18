@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "testrunner.h"
 
+static const char *erralloc = "testrunner: alloc failure";
+
 const char *terrdetails = 0;
 
 test test_new(const char *tname, testfunc fn) {
@@ -17,20 +19,22 @@ testrunner testrunner_new() {
 // returns <0 on error, 0 on success
 static int alloc_chk(testrunner *tr) {
 	if (tr->alloc_size == 0) {
+		// start allocating space for only one test
 		unsigned long alloc = sizeof(test);
 		test *tests = malloc(alloc);
 		if (!tests) {
-			//perror("testrunner: alloc failure");
+			perror(erralloc);
 			return -1;
 		}
 		tr->alloc_size = alloc;
 		tr->tests = tests;
 	}
 	else if (tr->alloc_size <= (tr->ntests * sizeof(test))) {
+		// double allocation size on each call ro realloc
 		unsigned long alloc = tr->alloc_size * 2;
 		test *tests = realloc(tr->tests, alloc);
 		if (!tests) {
-			//perror("testrunner: alloc failure");
+			perror(erralloc);
 			return -1;
 		}
 		tr->alloc_size = alloc;
