@@ -1,27 +1,30 @@
 CC = cc
 AR = ar
 CFLAGS = -Wall -Werror
+INCLUDES = -Isrc/testrunner.h
 
 .PHONY: all clean test
 
-all: target target/testrunner.o target/test
+all: target/lib/ctest.a target/bin/test
 
-target:
-	@mkdir -p target
+target/lib/ctest.a: src/testrunner.o
+	@mkdir -p target/lib
+	@$(AR) rcs $@ $^
 
-target/testrunner.o: src/testrunner.c src/testrunner.h
+src/testrunner.o: src/testrunner.c src/testrunner.h
+	@$(CC) $(CFLAGS) -c -o $@ $<
+
+target/bin/test: test/test.o target/lib/ctest.a
+	@mkdir -p target/bin
+	@$(CC) -o $@ $^
+
+test/test.o: test/test.c src/testrunner.h
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	@rm -rf target
+	@rm -rfv src/*.o test/*.o target
 
-target/test: target/test.o target/testrunner.o
-	@$(CC) -o $@ $^
-
-target/test.o: test/test.c src/testrunner.h
-	@$(CC) $(CFLAGS) -c -o $@ $<
-
-test: all
-	@./target/test
-
+test: target/bin/test
+	@$<
+	
 
