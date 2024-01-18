@@ -58,8 +58,6 @@ int testing_2(void){
 }
 
 int main(void) {
-	int fail = 0;
-	if (testing_1() || testing_2()) 
-		fail = 1;
-	return fail;
+	if (testing_1() || testing_2()) return 1;
+	return 0;
 }
