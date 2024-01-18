@@ -10,10 +10,7 @@ test test_new(const char *tname, testfunc fn) {
 }
 
 testrunner testrunner_new() {
-	testrunner t;
-	t.ntests = 0;
-	t.alloc_size = 0;
-	t.tests = 0;
+	testrunner t = {0,0,0};
 	return t;
 }
 
