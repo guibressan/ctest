@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "testrunner.h"
 
 static const char *erralloc = "testrunner: alloc failure";
@@ -60,21 +61,34 @@ void testrunner_drop(testrunner *trunner) {
 
 testreport testrunner_run(testrunner *trunner) {
 	testreport r = {0,0};
-	for (int i = 0, status = tstatus_PASS; i < trunner->ntests && status != tstatus_FATAL; ++i) {
+	unsigned long start = time(0);
+	for (
+		int i = 0, status = tstatus_PASS;
+		i < trunner->ntests && status != tstatus_FATAL;
+		++i
+	) {
+		unsigned long tstart = time(0);
 		test *rtest = &trunner->tests[i];
 		printf("RUNNING: %s", rtest->tname);
 		fflush(stdout);
 		tstatus s = rtest->fn();
+		unsigned long tend = time(0);
 		if (s != tstatus_PASS) {
 			status = s;
 			++r.nfailures;
 		} else ++r.npasses;
-		printf("\r\33[2K%s: %s\n", rtest->tname, tstatus_tostr(s));
+		printf(
+				"\r\33[2K%s: %s: %lus\n",
+				rtest->tname, tstatus_tostr(s), tend - tstart
+		);
 		if (s && terrdetails)
 			printf("\t%s failure details: %s\n", rtest->tname, terrdetails);
 		terrdetails = 0;
 	}
-	printf ("TEST REPORT: [ PASS: %d, FAIL: %d ]\n", r.npasses, r.nfailures);
+	printf (
+			"TEST REPORT: [ PASS: %d, FAIL: %d ]; %lus\n",
+			r.npasses, r.nfailures, time(0)-start
+	);
 	return r;
 }
 
