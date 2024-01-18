@@ -5,9 +5,7 @@
 const char *terrdetails = 0;
 
 test test_new(const char *tname, testfunc fn) {
-	test t;
-	t.tname = tname;
-	t.fn = fn;
+	test t = {tname, fn};
 	return t;
 }
 
