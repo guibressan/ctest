@@ -3,9 +3,9 @@
 	extern const char *terrdetails;
 
 	typedef enum {
-		PASS = 0,
-		FAIL = -1,
-		FATAL = -2,
+		tstatus_PASS = 0,
+		tstatus_FAIL = -1,
+		tstatus_FATAL = -2,
 	} tstatus;
 
 	typedef tstatus(*testfunc)(void);

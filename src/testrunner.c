@@ -60,12 +60,12 @@ void testrunner_drop(testrunner *trunner) {
 
 testreport testrunner_run(testrunner *trunner) {
 	testreport r = {0,0};
-	for (int i = 0, status = PASS; i < trunner->ntests && status != FATAL; ++i) {
+	for (int i = 0, status = tstatus_PASS; i < trunner->ntests && status != tstatus_FATAL; ++i) {
 		test *rtest = &trunner->tests[i];
 		printf("RUNNING: %s", rtest->tname);
 		fflush(stdout);
 		tstatus s = rtest->fn();
-		if (s != PASS) {
+		if (s != tstatus_PASS) {
 			status = s;
 			++r.nfailures;
 		} else ++r.npasses;
@@ -82,8 +82,8 @@ const char *tstatus_tostr(tstatus s) {
 	// no default case since the compiler should
 	// warn when the enum gets modified
 	switch (s) {
-	case PASS: return "PASS"; break;
-	case FAIL: return "FAIL"; break;
-	case FATAL: return "FATAL"; break;
+	case tstatus_PASS: return "PASS"; break;
+	case tstatus_FAIL: return "FAIL"; break;
+	case tstatus_FATAL: return "FATAL"; break;
 	}
 }

@@ -4,19 +4,19 @@
 
 tstatus test1(void) {
 	sleep(1);
-	return PASS;
+	return tstatus_PASS;
 }
 tstatus test2(void) {
 	terrdetails = "test2 err description";
-	return FAIL;
+	return tstatus_FAIL;
 }
 tstatus test3(void) {
 	terrdetails = "test3 err description";
-	return FATAL;
+	return tstatus_FATAL;
 }
 tstatus test4(void) {
 	terrdetails = "test4 err description";
-	return PASS;
+	return tstatus_PASS;
 }
 
 int testing_1(void){
