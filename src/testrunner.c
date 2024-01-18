@@ -69,7 +69,7 @@ testreport testrunner_run(testrunner *trunner) {
 			status = s;
 			++r.nfailures;
 		} else ++r.npasses;
-		printf("\r\33[2K%s: %s\n", rtest->tname, tstatustostr(s));
+		printf("\r\33[2K%s: %s\n", rtest->tname, tstatus_tostr(s));
 		if (s && terrdetails)
 			printf("\t%s failure details: %s\n", rtest->tname, terrdetails);
 		terrdetails = 0;
@@ -78,7 +78,7 @@ testreport testrunner_run(testrunner *trunner) {
 	return r;
 }
 
-const char *tstatustostr(tstatus s) {
+const char *tstatus_tostr(tstatus s) {
 	// no default case since the compiler should
 	// warn when the enum gets modified
 	switch (s) {

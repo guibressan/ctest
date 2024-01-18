@@ -44,6 +44,6 @@
 	testreport testrunner_run(testrunner *trunner);
 
 	// tstatus convert the test status to string
-	const char *tstatustostr(tstatus s);
+	const char *tstatus_tostr(tstatus s);
 
 #endif
