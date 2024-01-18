@@ -1,11 +1,14 @@
 CC = cc
 AR = ar
 CFLAGS = -Wall -Werror
-INCLUDES = -Isrc
+INCLUDES = -I$(PWD)/src
 
 .PHONY: all clean test
 
-all: target/lib/ctest.a target/bin/test
+all: .clangd target/lib/ctest.a target/bin/test
+
+.clangd:
+	@printf "CompileFlags:\n  Add: [\"$(INCLUDES)\"]\n" > .clangd
 
 target/lib/ctest.a: src/testrunner.o
 	@mkdir -p target/lib
@@ -22,7 +25,7 @@ test/test.o: test/test.c src/testrunner.h
 	@$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 clean:
-	@rm -rfv src/*.o test/*.o target
+	@rm -rfv src/*.o test/*.o target .clangd
 
 test: target/bin/test
 	@$<
