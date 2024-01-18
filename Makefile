@@ -1,7 +1,7 @@
 CC = cc
 AR = ar
 CFLAGS = -Wall -Werror
-INCLUDES = -Isrc/testrunner.h
+INCLUDES = -Isrc
 
 .PHONY: all clean test
 
@@ -19,7 +19,7 @@ target/bin/test: test/test.o target/lib/ctest.a
 	@$(CC) -o $@ $^
 
 test/test.o: test/test.c src/testrunner.h
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 clean:
 	@rm -rfv src/*.o test/*.o target
