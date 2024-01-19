@@ -69,8 +69,6 @@ testreport testrunner_run(testrunner *trunner) {
 	) {
 		unsigned long tstart = time(0);
 		test *rtest = &trunner->tests[i];
-		printf("RUNNING: %s", rtest->tname);
-		fflush(stdout);
 		tstatus s = rtest->fn();
 		unsigned long tend = time(0);
 		if (s != tstatus_PASS) {
@@ -78,7 +76,7 @@ testreport testrunner_run(testrunner *trunner) {
 			++r.nfailures;
 		} else ++r.npasses;
 		printf(
-				"\r\33[2K%s: %s: %lus\n",
+				"%s: %s: %lus\n",
 				rtest->tname, tstatus_tostr(s), tend - tstart
 		);
 		if (s && terrdetails)
