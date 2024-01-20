@@ -2,29 +2,26 @@
 #include <unistd.h>
 #include "ctest.h"
 
-ctest_status test1(void) {
+ctest_result test1(void) {
 	sleep(1);
-	return CTEST_STATUS_PASS;
+	return ctest_pass();
 }
-ctest_status test2(void) {
-	ctest_errdetails = "test2 err description";
-	return CTEST_STATUS_FAIL;
+ctest_result test2(void) {
+	return ctest_fail("test2 err description");
 }
-ctest_status test3(void) {
-	ctest_errdetails = "test3 err description";
-	return CTEST_STATUS_FATAL;
+ctest_result test3(void) {
+	return ctest_fatal("test3 err description");
 }
-ctest_status test4(void) {
-	ctest_errdetails = "test4 err description";
-	return CTEST_STATUS_PASS;
+ctest_result test4(void) {
+	return ctest_pass();
 }
 
 int testing_1(void){
 	ctest_testrunner t = ctest_testrunner_new();
-	ctest_testrunner_addtest(&t, ctest_test_new("test 1", test1));
-	ctest_testrunner_addtest(&t, ctest_test_new("test 2", test2));
-	ctest_testrunner_addtest(&t, ctest_test_new("test 3", test3));
-	ctest_testrunner_addtest(&t, ctest_test_new("test 4", test4));
+	ctest_testrunner_addtest(&t, "test 1", test1);
+	ctest_testrunner_addtest(&t, "test 2", test2);
+	ctest_testrunner_addtest(&t, "test 3", test3);
+	ctest_testrunner_addtest(&t, "test 4", test4);
 	ctest_testreport r = ctest_testrunner_run(&t);
 	ctest_testrunner_drop(&t);
 	if (r.nfailures != 2 && r.npasses != 1) {
@@ -41,9 +38,9 @@ int testing_1(void){
 
 int testing_2(void){
 	ctest_testrunner t = ctest_testrunner_new();
-	ctest_testrunner_addtest(&t, ctest_test_new("test 1", test1));
-	ctest_testrunner_addtest(&t, ctest_test_new("test 2", test2));
-	ctest_testrunner_addtest(&t, ctest_test_new("test 4", test4));
+	ctest_testrunner_addtest(&t, "test 1", test1);
+	ctest_testrunner_addtest(&t, "test 2", test2);
+	ctest_testrunner_addtest(&t, "test 4", test4);
 	ctest_testreport r = ctest_testrunner_run(&t);
 	ctest_testrunner_drop(&t);
 	if (r.nfailures != 1 && r.npasses != 2) {

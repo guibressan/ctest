@@ -1,15 +1,23 @@
+#include <malloc/_malloc.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 #include "ctest.h"
 
 static const char *erralloc = "testrunner: alloc failure";
 
-const char *ctest_errdetails = 0;
+ctest_result ctest_pass(void) {
+	ctest_result r = {0, CTEST_STATUS_PASS};
+	return r;
+}
 
-ctest_test ctest_test_new(const char *tname, testfunc fn) {
-	ctest_test t = {tname, fn};
-	return t;
+ctest_result ctest_fail(const char *failreason) {
+	ctest_result r = {failreason, CTEST_STATUS_FAIL};
+	return r;
+}
+
+ctest_result ctest_fatal(const char *failreason) {
+	ctest_result r = {failreason, CTEST_STATUS_FATAL};
+	return r;
 }
 
 ctest_testrunner ctest_testrunner_new() {
@@ -17,7 +25,14 @@ ctest_testrunner ctest_testrunner_new() {
 	return t;
 }
 
-// returns <0 on error, 0 on success
+static ctest_test ctest_new(const char *testname, testfunc fn) {
+	ctest_test t;
+	t.tname = testname;
+	t.fn = fn;
+	return t;
+}
+
+// returns 0 on error, 1 on success
 static int alloc_chk(ctest_testrunner *tr) {
 	if (tr->alloc_size == 0) {
 		// start allocating space for only one test
@@ -25,7 +40,7 @@ static int alloc_chk(ctest_testrunner *tr) {
 		ctest_test *tests = malloc(alloc);
 		if (!tests) {
 			perror(erralloc);
-			return -1;
+			return 0;
 		}
 		tr->alloc_size = alloc;
 		tr->tests = tests;
@@ -36,55 +51,57 @@ static int alloc_chk(ctest_testrunner *tr) {
 		ctest_test *tests = realloc(tr->tests, alloc);
 		if (!tests) {
 			perror(erralloc);
-			return -1;
+			return 0;
 		}
 		tr->alloc_size = alloc;
 		tr->tests = tests;
 	}
-	return 0;
+	return 1;
 }
 
-int ctest_testrunner_addtest(ctest_testrunner *trunner, ctest_test t) {
-	int err = alloc_chk(trunner);
-	if (err) return err;
-	trunner->ntests += 1;
-	trunner->tests[trunner->ntests-1] = t;
-	return 0;
+int ctest_testrunner_addtest(ctest_testrunner *tr, const char *testname, testfunc fn) {
+	ctest_test t = ctest_new(testname, fn);
+	if (alloc_chk(tr) != 1) return 0;
+	tr->ntests += 1;
+	tr->tests[tr->ntests-1] = t;
+	return 1;
 }
 
-void ctest_testrunner_drop(ctest_testrunner *trunner) {
-	free(trunner->tests);
-	trunner->ntests = 0;
-	trunner->alloc_size = 0;
-	trunner->tests = 0;
+void ctest_testrunner_drop(ctest_testrunner *tr) {
+	free(tr->tests);
+	tr->ntests = 0;
+	tr->alloc_size = 0;
+	tr->tests = 0;
 }
 
-ctest_testreport ctest_testrunner_run(ctest_testrunner *trunner) {
+ctest_testreport ctest_testrunner_run(ctest_testrunner *tr) {
 	ctest_testreport r = {0,0};
+	int keep_running = 1;
 	unsigned long start = time(0);
 	for (
 		int i = 0, status = CTEST_STATUS_PASS;
-		i < trunner->ntests && status != CTEST_STATUS_FATAL;
+		i < tr->ntests && keep_running;
 		++i
 	) {
 		unsigned long tstart = time(0);
-		ctest_test *rtest = &trunner->tests[i];
-		ctest_status s = rtest->fn();
+		ctest_test *rtest = &tr->tests[i];
+		printf("=== RUN\t%s\n", rtest->tname);
+		ctest_result s = rtest->fn();
 		unsigned long tend = time(0);
-		if (s != CTEST_STATUS_PASS) {
-			status = s;
+		if (s.status == CTEST_STATUS_PASS) ++r.npasses;
+		else {
 			++r.nfailures;
-		} else ++r.npasses;
+			if (s.status == CTEST_STATUS_FATAL) keep_running = 0;
+		}
 		printf(
-				"%s: %s: %lus\n",
-				rtest->tname, ctest_status_tostr(s), tend - tstart
+				"--- %s: %s (%lus)\n",
+				ctest_status_tostr(s.status), rtest->tname, tend - tstart
 		);
-		if (s && ctest_errdetails)
-			printf("\t%s failure details: %s\n", rtest->tname, ctest_errdetails);
-		ctest_errdetails = 0;
+		if (s.status != CTEST_STATUS_PASS && s.failreason)
+			printf("\t%s failure details: %s\n", rtest->tname, s.failreason);
 	}
 	printf (
-			"TEST REPORT: [ PASS: %d, FAIL: %d ]; %lus\n",
+			"TEST REPORT: [ PASS: %d, FAIL: %d ] (%lus)\n",
 			r.npasses, r.nfailures, time(0)-start
 	);
 	return r;
