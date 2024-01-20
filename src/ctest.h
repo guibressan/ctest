@@ -1,49 +1,49 @@
 #ifndef TESTRUNNER_H
 #define TESTRUNNER_H
-	extern const char *terrdetails;
+	extern const char *ctest_errdetails;
 
 	typedef enum {
-		tstatus_PASS = 0,
-		tstatus_FAIL = -1,
-		tstatus_FATAL = -2,
-	} tstatus;
+		CTEST_STATUS_PASS = 0,
+		CTEST_STATUS_FAIL = -1,
+		CTEST_STATUS_FATAL = -2,
+	} ctest_status;
 
-	typedef tstatus(*testfunc)(void);
+	typedef ctest_status(*testfunc)(void);
 
 	typedef struct {
 		const char *tname;
 		testfunc fn;
-	} test;
+	} ctest_test;
 
 	typedef struct {
 		int ntests;
 		int alloc_size;
-		test *tests;
-	} testrunner;
+		ctest_test *tests;
+	} ctest_testrunner;
 
 	typedef struct {
 		int nfailures;
 		int npasses;
-	} testreport;
+	} ctest_testreport;
 
 	// test_new creates a new test instance
-	test test_new(const char *tname, testfunc fn);
+	ctest_test ctest_test_new(const char *tname, testfunc fn);
 
 	// testrunner_new creates a new testrunner instance
-	testrunner testrunner_new();
+	ctest_testrunner ctest_testrunner_new();
 
 	// testrunner_drop drops the testrunner instance
-	void testrunner_drop(testrunner *trunner);
+	void ctest_testrunner_drop(ctest_testrunner *trunner);
 
 	// testrunner_add subscribes a new test
 	// returns <0 on error, 0 on success
-	int testrunner_add(testrunner *trunner, test t);
+	int ctest_testrunner_addtest(ctest_testrunner *trunner, ctest_test t);
 
 	// testrunner_run run all the tests
 	// returns the test report
-	testreport testrunner_run(testrunner *trunner);
+	ctest_testreport ctest_testrunner_run(ctest_testrunner *trunner);
 
 	// tstatus convert the test status to string
-	const char *tstatus_tostr(tstatus s);
+	const char *ctest_status_tostr(ctest_status s);
 
 #endif

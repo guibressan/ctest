@@ -2,31 +2,31 @@
 #include <unistd.h>
 #include "ctest.h"
 
-tstatus test1(void) {
+ctest_status test1(void) {
 	sleep(1);
-	return tstatus_PASS;
+	return CTEST_STATUS_PASS;
 }
-tstatus test2(void) {
-	terrdetails = "test2 err description";
-	return tstatus_FAIL;
+ctest_status test2(void) {
+	ctest_errdetails = "test2 err description";
+	return CTEST_STATUS_FAIL;
 }
-tstatus test3(void) {
-	terrdetails = "test3 err description";
-	return tstatus_FATAL;
+ctest_status test3(void) {
+	ctest_errdetails = "test3 err description";
+	return CTEST_STATUS_FATAL;
 }
-tstatus test4(void) {
-	terrdetails = "test4 err description";
-	return tstatus_PASS;
+ctest_status test4(void) {
+	ctest_errdetails = "test4 err description";
+	return CTEST_STATUS_PASS;
 }
 
 int testing_1(void){
-	testrunner t = testrunner_new();
-	testrunner_add(&t, test_new("test 1", test1));
-	testrunner_add(&t, test_new("test 2", test2));
-	testrunner_add(&t, test_new("test 3", test3));
-	testrunner_add(&t, test_new("test 4", test4));
-	testreport r = testrunner_run(&t);
-	testrunner_drop(&t);
+	ctest_testrunner t = ctest_testrunner_new();
+	ctest_testrunner_addtest(&t, ctest_test_new("test 1", test1));
+	ctest_testrunner_addtest(&t, ctest_test_new("test 2", test2));
+	ctest_testrunner_addtest(&t, ctest_test_new("test 3", test3));
+	ctest_testrunner_addtest(&t, ctest_test_new("test 4", test4));
+	ctest_testreport r = ctest_testrunner_run(&t);
+	ctest_testrunner_drop(&t);
 	if (r.nfailures != 2 && r.npasses != 1) {
 		fprintf(
 				stderr,
@@ -40,12 +40,12 @@ int testing_1(void){
 }
 
 int testing_2(void){
-	testrunner t = testrunner_new();
-	testrunner_add(&t, test_new("test 1", test1));
-	testrunner_add(&t, test_new("test 2", test2));
-	testrunner_add(&t, test_new("test 4", test4));
-	testreport r = testrunner_run(&t);
-	testrunner_drop(&t);
+	ctest_testrunner t = ctest_testrunner_new();
+	ctest_testrunner_addtest(&t, ctest_test_new("test 1", test1));
+	ctest_testrunner_addtest(&t, ctest_test_new("test 2", test2));
+	ctest_testrunner_addtest(&t, ctest_test_new("test 4", test4));
+	ctest_testreport r = ctest_testrunner_run(&t);
+	ctest_testrunner_drop(&t);
 	if (r.nfailures != 1 && r.npasses != 2) {
 		fprintf(
 				stderr, "testing_2 failed. nfailures: %d, npasses: %d",
