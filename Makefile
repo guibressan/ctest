@@ -13,4 +13,5 @@ clean:
 	@rm -rf build
 
 check:
+	@cmake --build build
 	@./build/test/test
