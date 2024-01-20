@@ -31,9 +31,9 @@ int testing_1(void){
 				r.nfailures,
 				r.npasses
 		);
-		return -1;
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 int testing_2(void){
@@ -49,12 +49,12 @@ int testing_2(void){
 				r.nfailures,
 				r.npasses
 		);
-		return -1;
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 int main(void) {
-	if (testing_1() || testing_2()) return 1;
-	return 0;
+	if (testing_1() && testing_2()) return 0;
+	return 1;
 }
