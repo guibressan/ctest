@@ -1,4 +1,4 @@
 target
-**/*.o
-**/*.a
 .clangd
+.cache
+build

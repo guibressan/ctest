@@ -1,33 +1,16 @@
-CC = cc
-AR = ar
-CFLAGS = -Wall -Werror
-INCLUDES = -I$(PWD)/src
+#!/usr/bin/env make
+####################
 
-.PHONY: all clean test
+.PHONY: all check clean
 
-all: .clangd target/lib/ctest.a target/bin/test
+all: build
+	@cmake --build build
 
-.clangd:
-	@printf "CompileFlags:\n  Add: [\"$(INCLUDES)\"]\n" > .clangd
-
-target/lib/ctest.a: src/testrunner.o
-	@mkdir -p target/lib
-	@$(AR) rcs $@ $^
-
-src/testrunner.o: src/testrunner.c src/testrunner.h
-	@$(CC) $(CFLAGS) -c -o $@ $<
-
-target/bin/test: test/test.o target/lib/ctest.a
-	@mkdir -p target/bin
-	@$(CC) -o $@ $^
-
-test/test.o: test/test.c src/testrunner.h
-	@$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+build:
+	@cmake -S . -B build
 
 clean:
-	@rm -rfv src/*.o test/*.o target .clangd
+	@rm -rf build
 
-test: target/bin/test
-	@$<
-	
-
+check:
+	@./build/test/test

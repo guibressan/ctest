@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include "testrunner.h"
+#include "ctest.h"
 
 tstatus test1(void) {
 	sleep(1);
