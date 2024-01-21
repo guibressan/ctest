@@ -26,9 +26,9 @@ typedef struct {
 } ctest_test;
 
 typedef struct {
-	int ntests;
-	size_t alloc_size;
 	ctest_test *tests;
+	size_t alloc_size;
+	int ntests;
 } ctest_testrunner;
 
 typedef struct {
