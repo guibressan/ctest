@@ -1,7 +1,7 @@
 #include <malloc/_malloc.h>
 #include <stdio.h>
 #include <time.h>
-#include "ctest.h"
+#include "ctest_util.h"
 
 static const char *erralloc = "testrunner: alloc failure";
 
@@ -21,7 +21,10 @@ ctest_result ctest_fatal(const char *failreason) {
 }
 
 ctest_testrunner ctest_testrunner_new() {
-	ctest_testrunner t = {0,0,0};
+	ctest_testrunner t;
+	t.tests = 0;
+	t.ntests = 0;
+	t.alloc_size = 0;
 	return t;
 }
 
@@ -59,7 +62,11 @@ static int alloc_chk(ctest_testrunner *tr) {
 	return 1;
 }
 
-int ctest_testrunner_addtest(ctest_testrunner *tr, const char *testname, testfunc fn) {
+int ctest_testrunner_addtest(
+		ctest_testrunner *tr,
+		const char *testname,
+		testfunc fn
+) {
 	ctest_test t = ctest_new(testname, fn);
 	if (alloc_chk(tr) != 1) return 0;
 	tr->ntests += 1;
@@ -76,34 +83,21 @@ void ctest_testrunner_drop(ctest_testrunner *tr) {
 
 ctest_testreport ctest_testrunner_run(ctest_testrunner *tr) {
 	ctest_testreport r = {0,0};
-	int keep_running = 1;
 	unsigned long start = time(0);
 	for (
-		int i = 0, status = CTEST_STATUS_PASS;
+		int i = 0, keep_running = 1;
 		i < tr->ntests && keep_running;
 		++i
 	) {
 		unsigned long tstart = time(0);
 		ctest_test *rtest = &tr->tests[i];
-		printf("=== RUN\t%s\n", rtest->tname);
-		ctest_result s = rtest->fn();
-		unsigned long tend = time(0);
-		if (s.status == CTEST_STATUS_PASS) ++r.npasses;
-		else {
-			++r.nfailures;
-			if (s.status == CTEST_STATUS_FATAL) keep_running = 0;
-		}
-		printf(
-				"--- %s: %s (%lus)\n",
-				ctest_status_tostr(s.status), rtest->tname, tend - tstart
-		);
-		if (s.status != CTEST_STATUS_PASS && s.failreason)
-			printf("\t%s failure details: %s\n", rtest->tname, s.failreason);
+		ctest_before_run_message(rtest->tname);
+		ctest_result tres = rtest->fn();
+		unsigned long t_elapsed = time(0)-start;
+		ctest_control_eval(tres, &r, &keep_running);
+		ctest_after_run_message(rtest->tname, tres, t_elapsed);
 	}
-	printf (
-			"TEST REPORT: [ PASS: %d, FAIL: %d ] (%lus)\n",
-			r.npasses, r.nfailures, time(0)-start
-	);
+	ctest_all_tests_finished_message(r, time(0)-start);
 	return r;
 }
 
